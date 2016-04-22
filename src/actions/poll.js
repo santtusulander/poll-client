@@ -16,8 +16,8 @@ export const SpecialActionTypes = {
 
 /**
  *
- * @param {string} username
- * @param {string }password
+ * @param {string} choice
+ * @param {string} pollID
  * @returns {Object}
  */
 export function vote(choice, pollID) {
@@ -31,8 +31,7 @@ export function vote(choice, pollID) {
 
 /**
  *
- * @param {string} username
- * @param {string }password
+ * @param {string} choice
  * @returns {Object}
  */
 export function createChoice(choice) {
@@ -44,8 +43,7 @@ export function createChoice(choice) {
 
 /**
  *
- * @param {string} username
- * @param {string }password
+ * @param {string} title
  * @returns {Object}
  */
 export function createTitle(title) {
@@ -57,8 +55,7 @@ export function createTitle(title) {
 
 /**
  *
- * @param {string} username
- * @param {string }password
+ * @param {Object} poll
  * @returns {Object}
  */
 export function create(poll) {
@@ -71,8 +68,7 @@ export function create(poll) {
 
 /**
  *
- * @param {string} username
- * @param {string }password
+ * @param {string }pollID
  * @returns {Object}
  */
 export function get(pollID) {
@@ -85,8 +81,7 @@ export function get(pollID) {
 
 /**
  *
- * @param {string} username
- * @param {string }password
+ * @param {string} pollID
  * @returns {Object}
  */
 export function getWithResults(pollID) {

@@ -9,10 +9,6 @@ import {
 } from '../actions/poll';
 
 /**
- * TODO: Create reducer for dirty data
- */
-
-/**
  * Called when store mutation request is initiated.
  *
  * @param {Map} state
@@ -67,7 +63,7 @@ export function handleMutateFailure(state, action) {
 }
 
 /**
- * Called when store mutation request fails.
+ * Called when new poll attribute is being created.
  *
  * @param {Map} state
  * @param {Object} action
