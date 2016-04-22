@@ -6,35 +6,63 @@ import { ChoicesContainer } from './choices';
 
 export class Poll extends Component {
 
+  componentWillMount() {
+    if (this.props.params.id) {
+      this.props.getPoll(this.props.params.id);
+    }
+  }
+
   componentWillReceiveProps(nextProps) {
-    if (nextProps.errorMessage) {
+    if (typeof nextProps.errorMessage === 'string') {
       console.log(nextProps.errorMessage);
     }
   }
 
+  renderCreateButton(sanitized, onSubmit, poll) {
+    return sanitized ? null
+      : <Button
+          onClick={() => onSubmit(poll)}
+          color={Colors.PRIMARY}
+          isExpanded>
+          Create poll
+        </Button>;
+  }
+
+  renderTitleButton(poll, setTitle) {
+    return poll.get('title') ? null
+       : <Button
+          onClick={() => setTitle(this.refs.title.value)}
+          color={Colors.PRIMARY}
+          isExpanded>
+          Save title
+        </Button>;
+  }
+
+  renderTitleField(poll) {
+    return poll.get('title')
+      || <input
+            type="text"
+            ref="title"
+            placeholder="Favorite programming language"
+            required
+          />;
+  }
+
   render() {
-    const { onSubmit, setTitle, poll } = this.props;
-    const handleCreatePoll = () => {
-      onSubmit(poll);
-    };
-    const handleSetTitle = () => {
-      setTitle(this.refs.title.value);
-    };
-    const titleField = poll.get('title')
-      ? poll.get('title')
-      : (<input type="text" ref="title" placeholder="Favorite programming language" required/>);
+    const { onSubmit, setTitle, poll, sanitized } = this.props;
     return (
       <div className="poll">
         <div className="poll-box">
           <label>
-            Title:
-            {titleField}
+            Title:<br/>
+            {this.renderTitleField(poll)}
           </label>
           <label>
             <ChoicesContainer/>
           </label>
-          <Button onClick={handleSetTitle} color={Colors.PRIMARY} isExpanded>Save title</Button>
-          <Button onClick={handleCreatePoll} color={Colors.PRIMARY} isExpanded>Create poll</Button>
+          {this.renderCreateButton(sanitized, onSubmit, poll)}
+          {this.renderTitleButton(poll, setTitle)}
+          {poll.get('id')}
         </div>
       </div>
     );
@@ -44,6 +72,7 @@ export class Poll extends Component {
 function mapStateToProps(state) {
   return {
     poll: state.poll,
+    sanitized: state.poll.get('sanitized'),
     errorMessage: state.poll.get('errorMessage'),
     isLoading: state.poll.get('isLoading')
   };
@@ -52,11 +81,10 @@ function mapStateToProps(state) {
 function mapDispatchToProps(dispatch) {
   return {
     onSubmit: (poll) => {
-      dispatch(create(poll));
+      let toCreate = poll.filter((item, key) => key !== 'votes' && item.size !== 0);
+      dispatch(create(toCreate.toJS()));
     },
-    setTitle: (title) => {
-      dispatch(createTitle(title));
-    }
+    setTitle: (title) => dispatch(createTitle(title))
   };
 }
 

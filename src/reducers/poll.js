@@ -2,7 +2,11 @@
 
 import { fromJS, Map, List } from 'immutable';
 import { createReducer } from '../helpers/store';
-import { PollActionTypes, PollApiActionTypes } from '../actions/poll';
+import {
+  PollApiActionTypes,
+  SpecialActionTypes,
+  StoreMutateSuccess
+} from '../actions/poll';
 
 /**
  * TODO: Create reducer for dirty data
@@ -29,11 +33,24 @@ export function handleMutateRequest(state, action) {
  * @returns {Map}
  */
 export function handleMutateSuccess(state, action) {
-  return state
+  state = state
     .set('isLoading', false)
     .set('title', action.data.title)
-    .set('choices', action.data.choices)
-    .set('votes', action.data.votes);
+    .set('choices', List(action.data.choices))
+    .set('id', action.data.id)
+    .set('sanitized', true);
+  switch (action.type) {
+    case SpecialActionTypes.GET_LIMITED:
+      break;
+    case SpecialActionTypes.VOTE_SUCCESS:
+      state = state.set('hasVoted', true);
+      state = state.set('votes', List(action.data.votes));
+      break;
+    default:
+      state = state.set('votes', List(action.data.votes));
+      break;
+  }
+  return state;
 }
 
 /**
@@ -58,10 +75,10 @@ export function handleMutateFailure(state, action) {
  */
 export function handleAttributeCreation(state, action) {
   switch (action.type[0]) {
-    case 'POLL/CREATE_CHOICE':
+    case SpecialActionTypes.CREATE_CHOICE:
       state = state.update('choices', choices => choices.push(action.data));
       break;
-    case 'POLL/CREATE_TITLE':
+    case SpecialActionTypes.CREATE_TITLE:
       state = state.set('title', action.data);
       break;
     default:
@@ -73,14 +90,15 @@ export function handleAttributeCreation(state, action) {
 
 const initialState = Map({
   choices: List(),
-  votes: List(),
-  title: ''
+  votes: List()
 });
 
 export const pollReducer = createReducer(initialState, {
+  [StoreMutateSuccess]: handleMutateSuccess,
   [PollApiActionTypes[0]]: handleMutateRequest,
-  [PollApiActionTypes[1]]: handleMutateSuccess,
-  [PollApiActionTypes[2]]: handleMutateFailure,
-  [PollActionTypes.CREATE_CHOICE]: handleAttributeCreation,
-  [PollActionTypes.CREATE_TITLE]: handleAttributeCreation
+  [PollApiActionTypes[1]]: handleMutateFailure,
+  [SpecialActionTypes.GET_LIMITED]: handleMutateSuccess,
+  [SpecialActionTypes.VOTE_SUCCESS]: handleMutateSuccess,
+  [SpecialActionTypes.CREATE_CHOICE]: handleAttributeCreation,
+  [SpecialActionTypes.CREATE_TITLE]: handleAttributeCreation
 });

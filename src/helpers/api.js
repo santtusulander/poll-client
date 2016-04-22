@@ -16,9 +16,11 @@ if (isUndefined(API_URL)) {
  * @returns {Error} err
  */
 export function fetchFromApi(url, init) {
-  fetch(buildRequest(url, init))
-    .then(response => response)
-    .catch(err => err);
+  return new Promise((resolve, reject) => {
+    fetch(buildRequest(url, init))
+      .then(response => !response.ok ? reject(response) : resolve(response))
+      .catch(err => reject(err));
+  });
 }
 
 /**

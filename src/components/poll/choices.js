@@ -12,50 +12,49 @@ export class Choices extends Component {
    */
 
   renderChoices() {
-    const { onVote, poll } = this.props;
-    if (poll.get('id')) {
-      return poll.get('choices').map((choice, index) => {
+    const { onVote, choices, votes, hasVoted, sanitized, pollId } = this.props;
+    if (sanitized) {
+      return choices.map((choice, index) => {
         return (
           <Choice
-            data={{ id: choice.id, poll: poll.get('id') }}
+            data={{ id: choice.id, poll: pollId }}
             onClick={ onVote }
             key={ index }
-            showVotes={ false }
+            showVotes={ hasVoted }
             sanitized>
-            { choice.title }
-            { poll.get('votes').get(index) || null }
+            {`choice: ${choice.label}`}
+            {votes.get(index)}
           </Choice>
         );
       });
     }
-    return poll.get('choices').map((choice, index) => {
+    return choices.map((choice, index) => {
       return (
-        <Choice
-          key={ index }
-          showVotes={ false }>
-          { choice }
+        <Choice key={ index }>
+          {`choice: ${choice}`}
         </Choice>
       );
     });
   }
 
-  handleCreate(event) {
-    event.preventDefault();
-    this.props.onCreateChoice(this.refs.new.value);
-  }
-
   render() {
+    const { sanitized, onCreateChoice } = this.props;
+    let input = sanitized ? null
+      : (
+        <div>
+          <input type="text" ref="new" />
+          <Button
+            color={Colors.PRIMARY}
+            isExpanded
+            onClick={ () => onCreateChoice(this.refs.new.value) }>
+            Create choice
+          </Button>
+        </div>
+      );
     return (
       <div>
         {this.renderChoices()}
-        <input type="text" ref="new" />
-        <Button
-          color={Colors.PRIMARY}
-          isExpanded
-          onClick={ e => this.handleCreate(e) }
-        >
-          Create choice
-        </Button>
+        {input}
       </div>
     );
   }
@@ -64,9 +63,11 @@ export class Choices extends Component {
 function mapStateToProps(state) {
   const poll = state.poll;
   return {
-    poll: poll,
+    hasVoted: poll.get('hasVoted'),
+    pollId: poll.get('id'),
     choices: poll.get('choices'),
-    votes: poll.get('votes')
+    votes: poll.get('votes'),
+    sanitized: poll.get('sanitized')
   };
 }
 

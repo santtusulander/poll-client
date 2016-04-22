@@ -4,13 +4,14 @@ import { fetchFromApi } from '../helpers/api';
 
 export const PollApiActionTypes = [
   'POLL/MUTATE_REQUEST',
-  'POLL/MUTATE_SUCCESS',
   'POLL/MUTATE_FAILURE'
 ];
-
-export const PollActionTypes = {
+export const StoreMutateSuccess = 'POLL/MUTATE_SUCCESS';
+export const SpecialActionTypes = {
   CREATE_CHOICE: 'POLL/CREATE_CHOICE',
-  CREATE_TITLE: 'POLL/CREATE_TITLE'
+  CREATE_TITLE: 'POLL/CREATE_TITLE',
+  GET_LIMITED: 'POLL/GET_LIMITED',
+  VOTE_SUCCESS: 'POLL/VOTE_SUCCESS'
 };
 
 /**
@@ -20,9 +21,10 @@ export const PollActionTypes = {
  * @returns {Object}
  */
 export function vote(choice, pollID) {
-  const init = { method: 'POST', body: { choice_id: choice } };
+  const body = JSON.stringify({ choice_id: choice });
+  const init = { method: 'POST', body };
   return {
-    types: PollApiActionTypes,
+    types: [...PollApiActionTypes, SpecialActionTypes.VOTE_SUCCESS],
     callApi: () => fetchFromApi(`poll/${pollID}/vote`, init)
   };
 }
@@ -35,7 +37,7 @@ export function vote(choice, pollID) {
  */
 export function createChoice(choice) {
   return {
-    type: [PollActionTypes.CREATE_CHOICE],
+    type: [SpecialActionTypes.CREATE_CHOICE],
     data: choice
   };
 }
@@ -48,7 +50,7 @@ export function createChoice(choice) {
  */
 export function createTitle(title) {
   return {
-    type: [PollActionTypes.CREATE_TITLE],
+    type: [SpecialActionTypes.CREATE_TITLE],
     data: title
   };
 }
@@ -60,9 +62,9 @@ export function createTitle(title) {
  * @returns {Object}
  */
 export function create(poll) {
-  const init = { method: 'POST', body: poll };
+  const init = { method: 'POST', body: JSON.stringify(poll) };
   return {
-    types: PollApiActionTypes,
+    types: [...PollApiActionTypes, StoreMutateSuccess],
     callApi: () => fetchFromApi('poll', init)
   };
 }
@@ -76,7 +78,7 @@ export function create(poll) {
 export function get(pollID) {
   const init = { method: 'GET' };
   return {
-    types: PollApiActionTypes,
+    types: [...PollApiActionTypes, SpecialActionTypes.GET_LIMITED],
     callApi: () => fetchFromApi(`poll/${pollID}`, init)
   };
 }
@@ -90,7 +92,7 @@ export function get(pollID) {
 export function getWithResults(pollID) {
   const init = { method: 'GET' };
   return {
-    types: PollApiActionTypes,
+    types: [...PollApiActionTypes, StoreMutateSuccess],
     callApi: () => fetchFromApi(`poll/${pollID}/results`, init)
   };
 }

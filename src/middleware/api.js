@@ -30,17 +30,24 @@ export default function apiMiddleware({ dispatch, getState }) {
       return;
     }
 
-    const [ requestType, successType, failureType ] = types;
-
+    const [ requestType, failureType, successType ] = types;
     dispatch({ ...payload, type: requestType });
-
     return callApi().then(
       response => {
         response.json().then(
-          data => dispatch({ ...payload, response, data, type: successType })
+          data => {
+            return dispatch({ data, type: successType });
+          }
         );
       },
-      error => dispatch({ ...payload, error, type: failureType })
+      error => {
+        if (!(error instanceof Error)) {
+          error.json().then(err => {
+            return dispatch({ error: err.message, type: failureType });
+          });
+        }
+        return dispatch({ error, type: failureType });
+      }
     );
   };
 }
