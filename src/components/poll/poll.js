@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { Colors, Button } from 'react-foundation';
 import { create, createTitle } from '../../actions/poll';
-import { ChoicesContainer } from './choices';
+import Choices from './choices';
 
 export class Poll extends Component {
 
@@ -49,7 +49,7 @@ export class Poll extends Component {
   }
 
   render() {
-    const { onSubmit, setTitle, poll, sanitized } = this.props;
+    const { onSubmit, setTitle, poll, sanitized, dispatch } = this.props;
     return (
       <div className="poll">
         <div className="poll-box">
@@ -58,7 +58,7 @@ export class Poll extends Component {
             {this.renderTitleField(poll)}
           </label>
           <label>
-            <ChoicesContainer/>
+            <Choices poll={poll} dispatch={dispatch}/>
           </label>
           {this.renderCreateButton(sanitized, onSubmit, poll)}
           {this.renderTitleButton(poll, setTitle)}
@@ -80,6 +80,7 @@ function mapStateToProps(state) {
 
 function mapDispatchToProps(dispatch) {
   return {
+    dispatch: dispatch,
     onSubmit: (poll) => {
       let toCreate = poll.filter((item, key) => key !== 'votes' && item.size !== 0);
       dispatch(create(toCreate.toJS()));

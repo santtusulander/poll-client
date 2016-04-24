@@ -9,7 +9,7 @@ export const Choice = props => {
       </div>
     );
   }
-  if (!sanitized){
+  if (!sanitized) {
     return (
       <div>
         { children }

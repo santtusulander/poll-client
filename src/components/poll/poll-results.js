@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { get } from '../../actions/poll';
-import { ChoicesContainer } from './choices';
+import Choices from './choices';
 
 export class Poll extends Component {
 
@@ -16,7 +16,7 @@ export class Poll extends Component {
   }
 
   render() {
-    const { poll } = this.props;
+    const { poll, dispatch } = this.props;
     return (
       <div className="poll">
         <div className="poll-box">
@@ -25,7 +25,7 @@ export class Poll extends Component {
             {poll.get('title')}
           </label>
           <label>
-            <ChoicesContainer/>
+            <Choices poll={poll} dispatch={dispatch}/>
           </label>
         </div>
       </div>
@@ -43,6 +43,7 @@ function mapStateToProps(state) {
 
 function mapDispatchToProps(dispatch) {
   return {
+    dispatch: dispatch,
     getPoll: (id) => dispatch(get(id))
   };
 }

@@ -1,29 +1,27 @@
 import React, { Component } from 'react';
-import { connect } from 'react-redux';
 import { vote, createChoice } from '../../actions/poll';
 import { Colors, Button } from 'react-foundation';
 import { Choice } from './choice';
 
-export class Choices extends Component {
+export default class Choices extends Component {
 
   /**
    * TODO: get votes smarter.. getting by index is fragile because it's
    * dependent on array order
    */
-
   renderChoices() {
-    const { onVote, choices, votes, hasVoted, sanitized, pollId } = this.props;
+    const { choices, votes, hasVoted, sanitized, id } = this.props.poll.toJS();
     if (sanitized) {
       return choices.map((choice, index) => {
         return (
           <Choice
-            data={{ id: choice.id, poll: pollId }}
-            onClick={ onVote }
+            data={{ id: choice.id, poll: id }}
+            onClick={ (pollID, choiceID) => this.props.dispatch(vote(pollID, choiceID)) }
             key={ index }
             showVotes={ hasVoted }
             sanitized>
             {`choice: ${choice.label}`}
-            {votes.get(index)}
+            {votes[index]}
           </Choice>
         );
       });
@@ -38,15 +36,15 @@ export class Choices extends Component {
   }
 
   render() {
-    const { sanitized, onCreateChoice } = this.props;
-    let input = sanitized ? null
+    const { dispatch } = this.props;
+    let input = this.props.poll.get('sanitized') ? null
       : (
         <div>
           <input type="text" ref="new" />
           <Button
             color={Colors.PRIMARY}
             isExpanded
-            onClick={ () => onCreateChoice(this.refs.new.value) }>
+            onClick={ () => dispatch(createChoice(this.refs.new.value)) }>
             Create choice
           </Button>
         </div>
@@ -60,26 +58,3 @@ export class Choices extends Component {
   }
 }
 
-function mapStateToProps(state) {
-  const poll = state.poll;
-  return {
-    hasVoted: poll.get('hasVoted'),
-    pollId: poll.get('id'),
-    choices: poll.get('choices'),
-    votes: poll.get('votes'),
-    sanitized: poll.get('sanitized')
-  };
-}
-
-function mapDispatchToProps(dispatch) {
-  return {
-    onCreateChoice: (choiceTitle) => {
-      dispatch(createChoice(choiceTitle));
-    },
-    onVote: (choiceID, pollID) => {
-      dispatch(vote(choiceID, pollID));
-    }
-  };
-}
-
-export const ChoicesContainer = connect(mapStateToProps, mapDispatchToProps)(Choices);
